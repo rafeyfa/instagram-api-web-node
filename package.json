@@ -1,0 +1,59 @@
+{
+  "name": "instagram-web-api-node",
+  "version": "1.0.1",
+  "description": "Instagram web api nodejs.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "instagram",
+    "node"
+  ],
+  "author": "Bayu Pratama",
+  "license": "ISC",
+  "dependencies": {
+    "@lifeomic/attempt": "^3.0.0",
+    "@types/chance": "^1.0.2",
+    "@types/request-promise": "^4.1.43",
+    "bluebird": "^3.7.1",
+    "chance": "^1.0.18",
+    "class-transformer": "^0.3.1",
+    "debug": "^4.1.1",
+    "fs-extra": "^10.0.0",
+    "json-bigint": "^1.0.0",
+    "lodash": "^4.17.20",
+    "reflect-metadata": "^0.1.13",
+    "request": "^2.88.2",
+    "request-promise": "^4.1.43",
+    "request-promise-native": "^1.0.9",
+    "rxjs": "^7.4.0",
+    "tough-cookie": "^3.0.1",
+    "ts-custom-error": "^2.2.2",
+    "ts-xor": "^1.0.6",
+    "url-regex-safe": "^1.0.2",
+    "user-agents": "^1.0.828",
+    "useragent-generator": "^1.1.1-amkt-22079-finish.0",
+    "utility-types": "^3.10.0",
+    "zip-a-folder": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/bluebird": "^3.5.26",
+    "@types/lodash": "^4.14.123",
+    "@types/luxon": "^1.12.0",
+    "@types/node": "^10.14.5",
+    "@types/tough-cookie": "^2.3.5",
+    "dotenv": "^6.2.0",
+    "json-ts": "^1.6.4",
+    "prettier": "^1.19.1",
+    "pretty-quick": "^1.10.0",
+    "rimraf": "^2.6.3",
+    "ts-node": "^8.1.0",
+    "tslint": "^5.16.0",
+    "typescript": "3.9.5"
+  }
+}
