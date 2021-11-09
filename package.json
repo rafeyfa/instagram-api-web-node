@@ -1,13 +1,20 @@
 {
   "name": "instagram-web-api-node",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Instagram web api nodejs.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yellowpanda-hdd/instagram-api-web.git"
+  },
   "files": [
     "dist"
   ],
   "scripts": {
+    "prebuild": "rimraf dist",
+    "start": "node -r dotenv/config .",
+    "build": "rimraf build && tsc -p tsconfig.json --outDir dist && node scripts/build.js",
     "test": "jest"
   },
   "keywords": [
