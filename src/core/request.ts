@@ -163,7 +163,7 @@ export class Request {
 
   public getDefaultHeaders() {
     return {
-      'User-Agent': this.client.state.webUserAgent,
+      'User-Agent': {},
       'accept-language': this.client.state.language || 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
       'sec-fetch-site': 'same-origin',
       'sec-fetch-mode': 'cors',
