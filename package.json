@@ -1,6 +1,6 @@
 {
-  "name": "instagram-web-api-node",
-  "version": "1.0.3",
+  "name": "instagram-api-web-node",
+  "version": "1.0.4",
   "description": "Instagram web api nodejs.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
