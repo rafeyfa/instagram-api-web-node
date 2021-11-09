@@ -4,8 +4,8 @@ const { IgApiClient } = require("../build");
 const instagram = new IgApiClient();
 (async () => {
 try{
-    const username = "sadina6179";
-    const password = "sadina689835";
+    const username = "";
+    const password = "";
     await instagram.ig.setCookieForFirst();
     const login = await instagram.ig.login(username, password);
 
