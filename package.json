@@ -1,12 +1,12 @@
 {
   "name": "instagram-api-web-node",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Instagram web api nodejs.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yellowpanda-hdd/instagram-api-web.git"
+    "url": "git://github.com/yellowpanda-hdd/instagram-api-web-node.git"
   },
   "files": [
     "dist"
@@ -44,7 +44,6 @@
     "ts-xor": "^1.0.6",
     "url-regex-safe": "^1.0.2",
     "user-agents": "^1.0.828",
-    "useragent-generator": "^1.1.1-amkt-22079-finish.0",
     "utility-types": "^3.10.0",
     "zip-a-folder": "^1.1.0"
   },
@@ -62,5 +61,8 @@
     "ts-node": "^8.1.0",
     "tslint": "^5.16.0",
     "typescript": "3.9.5"
+  },
+  "publishConfig": {
+    "registry":"https://npm.pkg.github.com"
   }
 }
