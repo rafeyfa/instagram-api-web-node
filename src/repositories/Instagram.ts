@@ -14,10 +14,7 @@ import {Response} from "request";
 export class Instagram extends Repository {
     public request: request;
     //private static accountDebug = debug('ig:account');
-    public async login(username: string, password: string): Promise<AccountRepositoryLoginResponseRootObject> {
-        const createEncPassword = pwd => {
-            return `#PWD_INSTAGRAM_BROWSER:0:${Date.now()}:${pwd}`
-        }
+    public async setCookieForFirst(){
         this.request = request.defaults({
             baseUrl: this.client.state.host,
             uri: '',
@@ -38,6 +35,17 @@ export class Instagram extends Repository {
             value = matches[0].substring(13)
         })
         this.client.state.csrftoken = value;
+        this.request = this.request.defaults({
+            headers:{
+                'x-csrftoken': this.client.state.csrftoken
+            }
+        })
+    }
+    public async login(username: string, password: string): Promise<AccountRepositoryLoginResponseRootObject> {
+        const createEncPassword = pwd => {
+            return `#PWD_INSTAGRAM_BROWSER:0:${Date.now()}:${pwd}`
+        }
+        
         let _sharedData: any;
         try {
            const response = await this.client.request.send<AccountRepositoryLoginResponseRootObject>({
@@ -51,7 +59,7 @@ export class Instagram extends Repository {
                 },
             });
             const sharedData = await this._getSharedData('/challenge/');
-           if(sharedData.entry_data.hasOwnProperty("Challenge")){
+            if(sharedData.entry_data.hasOwnProperty("Challenge")){
                 _sharedData = sharedData.entry_data.Challenge[0];
                 if (_sharedData.challengeType == "RecaptchaChallengeForm") {
                     throw new IgRecaptchaResponseError();
@@ -65,15 +73,14 @@ export class Instagram extends Repository {
     }
     public async getUserByUsername(username: string) {
         try {
-            let graphql: any;
-             graphql = await this.client.request.send({
+            const { body } = await this.client.request.send({
                 url: `/${username}/?__a=1`,
                 headers: {
                     referer: this.client.state.host + '/' + username + '/',
                     'x-instagram-gis': await this._getGis(`/${username}/`)
                 }
             })
-            return graphql.user;
+            return body.graphql.user;
         } catch (error) {
             const err = await this.handleErrorCode(error);
             throw err;
@@ -113,11 +120,10 @@ export class Instagram extends Repository {
     }
     public async getMediaByShortcode(shortcode: string) {
         try {
-            let graphql: any;
-            graphql = await this.client.request.send({
+            const { body } = await this.client.request.send({
                 url: `/p/${shortcode}/?__a=1`
             })
-            return graphql.shortcode_media;
+            return body.shortcode_media;
         } catch (error) {
             const err = await this.handleErrorCode(error);
             throw err;
@@ -131,11 +137,13 @@ export class Instagram extends Repository {
     }
 
     public async getProfile() {
-        return this.request('/accounts/edit/?__a=1').then(data => data.form_data)
+        const { body } = await this.client.request.send({ 
+            url: '/accounts/edit/?__a=1'
+        });
+        return body.form_data;
     }
     public async _getSharedData(url = '/') {
-        return this.request(url)
-            .then(
+        return this.request(url).then(
                 html => html.split('window._sharedData = ')[1].split(';</script>')[0]
             )
             .then(_sharedData => JSON.parse(_sharedData))

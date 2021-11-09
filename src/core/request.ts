@@ -42,7 +42,9 @@ export class Request {
     }
     return resolveWithFullResponse ? response : response.body;
   }
-
+  public async hasOwnProperty(obj: [], prop: string) {
+    return Object.prototype.hasOwnProperty.call(obj, prop);
+  }
   public async send<T = any>(userOptions: Options, onlyCheckHttpStatus?: boolean): Promise<IgResponse<T>> {
     const options = defaultsDeep(
       userOptions,
@@ -66,21 +68,18 @@ export class Request {
     this.updateState(response);
     //process.nextTick(() => this.end$.next());
     let errors: Error;
-    const resp = response.body;
-    if (typeof resp == "object" && response.statusCode == 200 && resp.hasOwnProperty("authenticated")) {
-      if (resp.hasOwnProperty('authenticated') && resp.authenticated) {
+    const hasAuth = await this.hasOwnProperty(response.body, "authenticated");
+    
+    if(typeof response.body == "object" && response.statusCode == 200) {
+        if (hasAuth) {
+          if (hasAuth && response.body.authenticated) {
+            return response;
+          } else if (hasAuth && !response.body.authenticated) {
+            errors = new IgLoginBadPasswordError("IgLoginBadPasswordError");
+          }
+          throw errors;
+        }
         return response;
-      }
-      else if (resp.hasOwnProperty('authenticated') && !resp.authenticated) {
-        errors = new IgLoginBadPasswordError("IgLoginBadPasswordError");
-      }
-      throw errors;
-    }
-    if (typeof resp == "object" && response.statusCode == 200 && resp.hasOwnProperty("status") && resp.status == "ok"){
-      return response;
-    }
-    if (typeof resp === "object" && response.statusCode === 200 && resp.hasOwnProperty("graphql")){
-      return response;
     }
     const error = this.handleResponseError(response);
     process.nextTick(() => this.error$.next(error));
