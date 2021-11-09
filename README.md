@@ -47,4 +47,7 @@ const { IgApiClient } = require("instagram-web-api-node");
       console.log(error.name)
   }
   ```
+<<<<<<< HEAD
 
+=======
+>>>>>>> 61930590ac41950bd55210f5af9fb951554311d5
