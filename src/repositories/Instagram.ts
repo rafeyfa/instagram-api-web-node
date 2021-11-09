@@ -1,6 +1,6 @@
 import { Repository } from '../core/repository';
 import {
-    AccountRepositoryLoginResponseRootObject} from '../responses';
+    AccountRepositoryLoginResponseRootObject , ChallengeStateResponse} from '../responses';
 import {
     IgClientError,
     IgLoginRequiredError, IgRecaptchaResponseError, IgRequestsLimitError, IgUsernameNotFound
@@ -135,7 +135,20 @@ export class Instagram extends Repository {
         })
         return body.graphql.user
     }
-
+    public async BypassChallenge(choice: string, isReplay = false) {
+        let url: string = '/challenge/';
+        const { body } = await this.client.request.sendAppVersion<ChallengeStateResponse>({
+          url,
+          method: 'POST',
+          form: this.client.request.sign({
+            choice,
+            _csrftoken: this.client.state.cookieCsrfToken || this.client.state.csrftoken,
+            guid: this.client.request.uuid,
+            device_id: this.client.request.deviceid,
+          }),
+        });
+        return body;
+     }
     public async getProfile() {
         const { body } = await this.client.request.send({ 
             url: '/accounts/edit/?__a=1'
