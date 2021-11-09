@@ -14,6 +14,7 @@ import {Response} from "request";
 export class Instagram extends Repository {
     public request: request;
     //private static accountDebug = debug('ig:account');
+
     public async setCookieForFirst(){
         this.request = request.defaults({
             baseUrl: this.client.state.host,
@@ -29,7 +30,7 @@ export class Instagram extends Repository {
             json: true
         })
         let value: string;
-        await this.request('/', { resolveWithFullResponse: true }).then(res => {
+        this.request('/', { resolveWithFullResponse: true }).then(res => {
             const pattern = new RegExp(/(csrf_token":")\w+/)
             const matches = res.toJSON().body.match(pattern)
             value = matches[0].substring(13)
@@ -76,8 +77,7 @@ export class Instagram extends Repository {
             const { body } = await this.client.request.send({
                 url: `/${username}/?__a=1`,
                 headers: {
-                    referer: this.client.state.host + '/' + username + '/',
-                    'x-instagram-gis': await this._getGis(`/${username}/`)
+                    referer: this.client.state.host + '/' + username + '/'
                 }
             })
             return body.graphql.user;
@@ -100,7 +100,7 @@ export class Instagram extends Repository {
     public async like(mediaId) {
         const { body } = await this.client.request.send({
             method: 'POST',
-            url: `/web/like/${mediaId}/like/`
+            url: `/web/likes/${mediaId}/like/`
         })
         return body;
     }
@@ -123,7 +123,7 @@ export class Instagram extends Repository {
             const { body } = await this.client.request.send({
                 url: `/p/${shortcode}/?__a=1`
             })
-            return body.shortcode_media;
+            return body.graphql.shortcode_media;
         } catch (error) {
             const err = await this.handleErrorCode(error);
             throw err;

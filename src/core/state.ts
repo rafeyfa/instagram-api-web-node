@@ -3,15 +3,16 @@ import * as Bluebird from 'bluebird';
 import { jar } from 'request';
 import { Cookie, CookieJar, MemoryCookieStore } from 'tough-cookie';
 import { IgCookieNotFoundError, IgUserIdNotFoundError } from '../errors';
+
 import { Enumerable } from '../decorators';
 import debug from 'debug';
 const user_agents_1 = require("user-agents");
+const useragents = new user_agents_1();
 export class State {
   private static stateDebug = debug('ig:state');
-  language: string = 'en_US';
+  language: string = 'id-ID';
   timezoneOffset: string = String(new Date().getTimezoneOffset() * -60);
   proxyUrl: string;
-  useragents: string = new user_agents_1();
   @Enumerable(false)
   cookieStore = new MemoryCookieStore();
   @Enumerable(false)
@@ -28,7 +29,7 @@ export class State {
   passwordEncryptionKeyId?: string | number;
 
   public get webUserAgent() {
-    return this.useragents.toString();
+    return useragents.toString();
   }
 
   public get cookieCsrfToken() {
@@ -81,7 +82,7 @@ export class State {
     return Bluebird.fromCallback(cb => this.cookieJar['_jar'].serialize(cb));
   }
 
-  public async serialize(): Promise<{ constants; cookies } & any> {
+  public async serialize(): Promise<{ cookies } & any> {
     const obj = {
       cookies: JSON.stringify(await this.serializeCookieJar()),
     };
