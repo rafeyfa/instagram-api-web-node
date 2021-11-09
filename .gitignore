@@ -3,5 +3,4 @@ node_modules
 .ssh
 build
 releases
-scripts
 dist
