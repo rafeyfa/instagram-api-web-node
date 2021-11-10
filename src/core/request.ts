@@ -234,7 +234,7 @@ export class Request {
     const options = defaultsDeep(
       userOptions,
       {
-        baseUrl: 'https://i.instagram.com/',
+        baseUrl: 'https://i.instagram.com/api/v1',
         resolveWithFullResponse: true,
         proxy: this.client.state.proxyUrl,
         simple: false,
@@ -242,7 +242,7 @@ export class Request {
         jar: this.client.state.cookieJar,
         strictSSL: false,
         gzip: true,
-        headers: this.getHeadersAppVersion(),
+        headers: this.getHeadersAppVersion,
         method: 'GET',
       },
       this.defaults,
