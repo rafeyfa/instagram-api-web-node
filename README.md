@@ -34,7 +34,7 @@ function save(data){
   }
 })();
   ```
-# How to login without cookie
+# How to login without username and password
 ```node
 const { IgApiClient } = require("instagram-web-api-node");
 (async () => { 
