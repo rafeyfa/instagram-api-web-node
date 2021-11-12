@@ -2,15 +2,12 @@ import { Repository } from '../core/repository';
 import {
     AccountRepositoryLoginResponseRootObject , ChallengeStateResponse} from '../responses';
 import {
-    IgClientError,
-    IgLoginRequiredError, IgRecaptchaResponseError, IgRequestsLimitError, IgUsernameNotFound
-} from '../errors';
+    IgRecaptchaResponseError} from '../errors';
 // @ts-ignore
 import { defaultsDeep } from 'lodash';
 // @ts-ignore
 import * as crypto from 'crypto';
 import * as request from 'request-promise-native';
-import {Response} from "request";
 export class Instagram extends Repository {
     public request: request;
     //private static accountDebug = debug('ig:account');
@@ -72,19 +69,14 @@ export class Instagram extends Repository {
         }
         //return response.body.logged_in_user;
     }
-    public async getUserByUsername(username: string) {
-        try {
-            const { body } = await this.client.request.send({
-                url: `/${username}/?__a=1`,
-                headers: {
-                    referer: this.client.state.host + '/' + username + '/'
-                }
-            })
-            return body.graphql.user;
-        } catch (error) {
-            const err = await this.handleErrorCode(error);
-            throw err;
-        }
+    public async getUserByUsername(username) {
+        return this.request({
+          uri: `/${username}/?__a=1`,
+          headers: {
+            referer: this.client.state.host + '/' + username + '/',
+            'x-instagram-gis': await this._getGis(`/${username}/`)
+          }
+        }).then(data => data.graphql.user)
     }
     public async _getGis(path) {
         const { rhx_gis } = await this._getSharedData(path);
@@ -104,30 +96,10 @@ export class Instagram extends Repository {
         })
         return body;
     }
-    private handleErrorCode(response: Response): IgClientError {
-        if (response.statusCode == 404) {
-            return new IgUsernameNotFound();
-        }
-        if (response.statusCode == 302) {
-            return new IgLoginRequiredError(response);
-        }
-        if (response.statusCode == 401) {
-            return new IgLoginRequiredError(response);
-        }
-        if (response.statusCode == 429) {
-            return new IgRequestsLimitError();
-        }
-    }
-    public async getMediaByShortcode(shortcode: string) {
-        try {
-            const { body } = await this.client.request.send({
-                url: `/p/${shortcode}/?__a=1`
-            })
-            return body.graphql.shortcode_media;
-        } catch (error) {
-            const err = await this.handleErrorCode(error);
-            throw err;
-        }
+   public async  getMediaByShortcode({ shortcode }) {
+        return this.request(`/p/${shortcode}/?__a=1`).then(
+          data => data.graphql.shortcode_media
+        )
     }
     public async getActivity() {
         const { body } = await this.client.request.send({
@@ -143,8 +115,8 @@ export class Instagram extends Repository {
           form: this.client.request.sign({
             choice,
             _csrftoken: this.client.state.cookieCsrfToken || this.client.state.csrftoken,
-            guid: this.client.request.uuid,
-            device_id: this.client.request.deviceid,
+            guid: this.client.state.uuid,
+            device_id: this.client.state.deviceId,
           }),
         });
         return body;
