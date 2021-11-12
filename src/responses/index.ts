@@ -18,3 +18,4 @@ export * from './liked.feed.response';
 export * from './spam.response';
 export * from './spam.response';
 export * from './ig-get-user-by-username.response';
+export * from './user.repository.info.response';

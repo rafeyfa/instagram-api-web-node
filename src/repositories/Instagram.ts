@@ -1,6 +1,6 @@
 import { Repository } from '../core/repository';
 import {
-    AccountRepositoryLoginResponseRootObject , ChallengeStateResponse} from '../responses';
+    AccountRepositoryLoginResponseRootObject , ChallengeStateResponse, MediaInfoResponseRootObject, UserRepositoryInfoResponseRootObject, UserRepositoryInfoResponseUser} from '../responses';
 import {
     IgRecaptchaResponseError} from '../errors';
 // @ts-ignore
@@ -8,6 +8,7 @@ import { defaultsDeep } from 'lodash';
 // @ts-ignore
 import * as crypto from 'crypto';
 import * as request from 'request-promise-native';
+import { AccountRepositoryCurrentUserResponseRootObject } from 'src/responses/account.repository.current-user.response';
 export class Instagram extends Repository {
     public request: request;
     //private static accountDebug = debug('ig:account');
@@ -82,6 +83,7 @@ export class Instagram extends Repository {
         const { rhx_gis } = await this._getSharedData(path);
         return crypto.createHash('md5').update(`${rhx_gis}:${path}`).digest('hex')
     }
+    
     public async follow(userId) {
         const { body } = await this.client.request.send({
             method: 'POST',
@@ -107,6 +109,35 @@ export class Instagram extends Repository {
         })
         return body.graphql.user
     }
+    public async UserInfo(id: string | number): Promise<UserRepositoryInfoResponseUser> {
+        const { body } = await this.client.request.sendAppVersion<UserRepositoryInfoResponseRootObject>({
+          url: `/users/${id}/info/`,
+        });
+        return body.user;
+    }
+    public async MediaInfo(mediaId: string): Promise<MediaInfoResponseRootObject> {
+        const { body } = await this.client.request.sendAppVersion<MediaInfoResponseRootObject>({
+          url: `/media/${mediaId}/info/`,
+          method: 'GET',
+          form: this.client.request.sign({
+            igtv_feed_preview: false,
+            media_id: mediaId,
+            _csrftoken: this.client.state.cookieCsrfToken,
+            _uid: this.client.state.cookieUserId,
+            _uuid: this.client.state.uuid,
+          }),
+        });
+        return body;
+    }
+    public async currentUser() {
+        const { body } = await this.client.request.sendAppVersion<AccountRepositoryCurrentUserResponseRootObject>({
+          url: '/accounts/current_user/',
+          qs: {
+            edit: true,
+          },
+        });
+        return body.user;
+      }
     public async BypassChallenge(choice: string, isReplay = false) {
         let url: string = '/challenge/';
         const { body } = await this.client.request.sendAppVersion<ChallengeStateResponse>({
