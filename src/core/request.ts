@@ -136,6 +136,15 @@ export class Request {
       return new IgRequestsLimitError();
     }
     if (typeof json.message == 'string') {
+      if (json.message === 'challenge_required') {
+          return new IgCheckpointError(response);
+      }
+      if (json.message === 'user_has_logged_out') {
+        return new IgLoginRequiredError(response);
+      }
+      if (json.message === 'login_required') {
+        return new IgLoginRequiredError(response);
+      }
       if (json.message == 'checkpoint_required') {
         return new IgCheckpointError(response);
       }
@@ -145,6 +154,12 @@ export class Request {
       if(json.message == 'Please wait a few minutes before you try again.'){
         return new IgRequestsLimitError();
       }
+    }
+    if (json.error_type === 'sentry_block') {
+      return new IgRequestsLimitError();
+    }
+    if (json.error_type === 'inactive user') {
+      return new IgInactiveUserError(response);
     }
     if(json.two_factor_required){
       return new IgLoginTwoFactorRequiredError("IgLoginTwoFactorRequiredError");
