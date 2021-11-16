@@ -148,6 +148,9 @@ export class State {
       return 'missing';
     }
   }
+  public get cookieIgdid() {
+      return this.extractCookieValue('ig_did');
+  }
 
   public get cookieUserId() {
     return this.extractCookieValue('ds_user_id');

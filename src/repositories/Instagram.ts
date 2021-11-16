@@ -164,4 +164,57 @@ export class Instagram extends Repository {
             )
             .then(_sharedData => JSON.parse(_sharedData))
     }
+    /*************** NEW ****************/
+    public async friendshipInfo(id: number) {
+        const { body } = await this.client.request.send({
+            baseUrl: `https://i.instagram.com`,
+            url: `/api/v1/friendships/show/${id}`
+        });
+        return body;
+    }
+    public async topsearch(username: string) {
+        const { body } = await this.client.request.send({
+            url: `/web/search/topsearch/?context=blended&query=${username}`,
+        });
+        return body.users;
+    }
+    public async userstory(pk: number){
+        const { body } = await this.client.request.send({
+            baseUrl: `https://i.instagram.com`,
+            url: `/api/v1/feed/user/${pk}/story/`
+        });
+        return body;
+    }
+    public async StorySeen(form){
+        const { body } = await this.client.request.send({
+            url: `/stories/reel/seen`,
+            method: 'POST',
+            headers: {
+                Referer: "https://www.instagram.com/stories/dagelan/2708008864439426280/"
+            },
+            form
+        });
+        return body;
+    }
+    public async search_click(pk: number){
+        const { body } = await this.client.request.send({
+            baseUrl: `https://i.instagram.com`,
+            url: `/api/v1/fbsearch/register_recent_search_click/`,
+            method: 'POST',
+            form: {
+                entity_id: pk,
+	            entity_type: "user"
+            }
+        });
+        return body;
+    }
+    public async userFeed(pk: number){
+        const { body } = await this.client.request.sendAppVersion({
+            url: `/feed/user/${pk}/`,
+            qs: {
+                max_id: null,
+            },
+        });
+        return body.items;
+    }
 }
