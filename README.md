@@ -25,7 +25,7 @@ function save(data){
       });
       //set login account
       const { username, password } = process.env; 
-      //Get access token for headers default. (Just for login without cookies)
+      //Get access token for headers default. setCookieForFirst()
       await instagram.ig.setCookieForFirst(); 
       //login use account username and password
       await instagram.ig.login(username, password);
@@ -34,7 +34,7 @@ function save(data){
   }
 })();
   ```
-# How to login without cookie
+# How to login without username and password
 ```node
 const { IgApiClient } = require("instagram-web-api-node");
 (async () => { 
