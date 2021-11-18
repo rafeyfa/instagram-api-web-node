@@ -206,7 +206,7 @@ export class Request {
       'x-requested-with': 'XMLHttpRequest',
       'X-IG-WWW-Claim': this.client.state.igWWWClaim || '0',
       'x-instagram-ajax': 1,
-      'x-csrftoken': this.client.state.cookieCsrfToken || this.client.state.csrftoken,
+      'x-csrftoken': this.client.state.cookieCsrfToken,
       'x-ig-app-id': 936619743392459,
       'origin': 'https://www.instagram.com',
       Referer: this.client.state.host

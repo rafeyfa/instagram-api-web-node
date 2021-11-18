@@ -10,42 +10,33 @@ import * as crypto from 'crypto';
 import * as request from 'request-promise-native';
 import { AccountRepositoryCurrentUserResponseRootObject } from 'src/responses/account.repository.current-user.response';
 export class Instagram extends Repository {
-    public request: request;
-    //private static accountDebug = debug('ig:account');
-
-    public async setCookieForFirst(){
-        this.request = request.defaults({
-            baseUrl: this.client.state.host,
-            uri: '',
-            headers:{
-                'User-Agent': this.client.state.webUserAgent,
-                'Accept-Language': this.client.state.language || 'en-US',
-                'X-Instagram-AJAX': 1,
-                'X-Requested-With': 'XMLHttpRequest',
-                Referer: this.client.state.host
-            },
-            jar: this.client.state.cookieJar,
-            json: true
-        })
-        let value: string;
-        this.request('/', { resolveWithFullResponse: true }).then(res => {
-            const pattern = new RegExp(/(csrf_token":")\w+/)
-            const matches = res.toJSON().body.match(pattern)
-            value = matches[0].substring(13)
-        })
-        this.client.state.csrftoken = value;
-        this.request = this.request.defaults({
-            headers:{
-                'x-csrftoken': this.client.state.csrftoken
-            }
-        })
-    }
+    request = request.defaults({
+        baseUrl: this.client.state.host,
+        uri: '',
+        headers:{
+            'User-Agent': this.client.state.webUserAgent,
+            'Accept-Language': this.client.state.language || 'en-US',
+            'X-Instagram-AJAX': 1,
+            'X-Requested-With': 'XMLHttpRequest',
+            'x-csrftoken': this.client.state.cookieCsrfToken,
+            Referer: this.client.state.host
+        },
+        jar: this.client.state.cookieJar,
+        json: true
+    })
     public async login(username: string, password: string): Promise<AccountRepositoryLoginResponseRootObject> {
         const createEncPassword = pwd => {
             return `#PWD_INSTAGRAM_BROWSER:0:${Date.now()}:${pwd}`
         }
         
         let _sharedData: any;
+        let value: string;
+        this.request('/', { resolveWithFullResponse: true }).then(res => {
+            const pattern = new RegExp(/(csrf_token":")\w+/)
+            const matches = res.toJSON().body.match(pattern)
+            value = matches[0].substring(13)
+        })
+        this.client.state.cookieCsrfToken = value;
         try {
            const response = await this.client.request.send<AccountRepositoryLoginResponseRootObject>({
                 method: 'POST',
@@ -165,6 +156,21 @@ export class Instagram extends Repository {
             .then(_sharedData => JSON.parse(_sharedData))
     }
     /*************** NEW ****************/
+    public async GetTimelineFeed() {
+       const { body } = await this.client.request.send({
+            baseUrl: "https://i.instagram.com",
+            url: "/api/v1/feed/timeline/",
+            method: 'POST',
+            form: {
+                is_async_ads_in_headload_enabled: 0,
+                rti_delivery_backend: 0,
+                is_async_ads_rti: 0,
+                is_async_ads_double_request: 0,
+                device_id: this.client.state.deviceId,
+            },
+        });
+        return body;
+    }
     public async friendshipInfo(id: number) {
         const { body } = await this.client.request.send({
             baseUrl: `https://i.instagram.com`,

@@ -69,7 +69,7 @@ export class State {
   isLayoutRTL: boolean = false;
   euDCEnabled?: boolean = undefined;
   adsOptOut: boolean = false;
-  csrftoken: string = null;
+  csrftoken: string[] = [];
   thumbnailCacheBustingValue: number = 1000;
   igWWWClaim?: string;
   authorization?: string;
@@ -140,14 +140,17 @@ export class State {
   public isExperimentEnabled(experiment) {
     return this.experiments.includes(experiment);
   }
+  public set cookieCsrfToken(value: string) {
+      this.csrftoken.push(value)
+  }
   public get cookieCsrfToken() {
     try {
       return this.extractCookieValue('csrftoken');
     } catch {
-      State.stateDebug('csrftoken lookup failed, returning "missing".');
-      return 'missing';
+      return this.csrftoken[0];
     }
   }
+  
   public get cookieIgdid() {
       return this.extractCookieValue('ig_did');
   }
@@ -173,7 +176,7 @@ export class State {
     }
     return cookie.value;
   }
-
+  
   public extractUserId(): string {
     try {
       return this.cookieUserId;
