@@ -18,7 +18,6 @@ export class Instagram extends Repository {
             'Accept-Language': this.client.state.language || 'en-US',
             'X-Instagram-AJAX': 1,
             'X-Requested-With': 'XMLHttpRequest',
-            'x-csrftoken': this.client.state.cookieCsrfToken,
             Referer: this.client.state.host
         },
         jar: this.client.state.cookieJar,
@@ -28,7 +27,6 @@ export class Instagram extends Repository {
         const createEncPassword = pwd => {
             return `#PWD_INSTAGRAM_BROWSER:0:${Date.now()}:${pwd}`
         }
-        
         let _sharedData: any;
         let value: string;
         this.request('/', { resolveWithFullResponse: true }).then(res => {
@@ -36,7 +34,10 @@ export class Instagram extends Repository {
             const matches = res.toJSON().body.match(pattern)
             value = matches[0].substring(13)
         })
-        this.client.state.cookieCsrfToken = value;
+        this.client.state.csrftoken = value;
+        this.request = this.request.defaults({
+            headers: { 'X-CSRFToken': value }
+        })
         try {
            const response = await this.client.request.send<AccountRepositoryLoginResponseRootObject>({
                 method: 'POST',
@@ -113,7 +114,7 @@ export class Instagram extends Repository {
           form: this.client.request.sign({
             igtv_feed_preview: false,
             media_id: mediaId,
-            _csrftoken: this.client.state.cookieCsrfToken,
+            _csrftoken: this.client.state.cookieCsrfToken || this.client.state.csrftoken,
             _uid: this.client.state.cookieUserId,
             _uuid: this.client.state.uuid,
           }),

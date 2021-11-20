@@ -198,7 +198,7 @@ export class Request {
 
   public getDefaultHeaders() {
     return {
-      'User-Agent': {},
+      'User-Agent': this.client.state.webUserAgent || this.client.state.useragents,
       'accept-language': this.client.state.language || 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
       'sec-fetch-site': 'same-origin',
       'sec-fetch-mode': 'cors',
@@ -206,7 +206,7 @@ export class Request {
       'x-requested-with': 'XMLHttpRequest',
       'X-IG-WWW-Claim': this.client.state.igWWWClaim || '0',
       'x-instagram-ajax': 1,
-      'x-csrftoken': this.client.state.cookieCsrfToken,
+      'x-csrftoken': this.client.state.cookieCsrfToken || this.client.state.csrftoken,
       'x-ig-app-id': 936619743392459,
       'origin': 'https://www.instagram.com',
       Referer: this.client.state.host

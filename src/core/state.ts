@@ -69,7 +69,7 @@ export class State {
   isLayoutRTL: boolean = false;
   euDCEnabled?: boolean = undefined;
   adsOptOut: boolean = false;
-  csrftoken: string[] = [];
+  csrftoken: string = null;
   thumbnailCacheBustingValue: number = 1000;
   igWWWClaim?: string;
   authorization?: string;
@@ -80,14 +80,7 @@ export class State {
   uuid: string;
   phoneId: string;
   host: string = "https://www.instagram.com"
-  /**
-   * Google Play Advertising ID.
-   *
-   * The advertising ID is a unique ID for advertising, provided by Google
-   * Play services for use in Google Play apps. Used by Instagram.
-   *
-   * @see https://support.google.com/googleplay/android-developer/answer/6048248?hl=en
-   */
+  useragents: string = useragents.toString();
   adid: string;
   deviceId: string;
   @Enumerable(false)
@@ -98,6 +91,7 @@ export class State {
   cookieJar = jar(this.cookieStore);
   clientSessionIdLifetime: number = 1200000;
   pigeonSessionIdLifetime: number = 1200000;
+
   public get clientSessionId(): string {
     return this.generateTemporaryGuid('clientSessionId', this.clientSessionIdLifetime);
   }
@@ -134,20 +128,20 @@ export class State {
     return chance.bool();
   }
 
-  public get webUserAgent() {
-    return useragents.toString();
+  public webUserAgent() {
+    return this.useragents;
   }
+
   public isExperimentEnabled(experiment) {
     return this.experiments.includes(experiment);
   }
-  public set cookieCsrfToken(value: string) {
-      this.csrftoken.push(value)
-  }
-  public get cookieCsrfToken() {
+
+ public get cookieCsrfToken() {
     try {
       return this.extractCookieValue('csrftoken');
     } catch {
-      return this.csrftoken[0];
+      State.stateDebug('csrftoken lookup failed, returning "missing".');
+      return 'missing';
     }
   }
   
