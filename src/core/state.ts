@@ -128,7 +128,7 @@ export class State {
     return chance.bool();
   }
 
-  public webUserAgent() {
+  public get webUserAgent() {
     return this.useragents;
   }
 
