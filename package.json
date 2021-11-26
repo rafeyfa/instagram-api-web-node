@@ -1,6 +1,6 @@
 {
   "name": "instagram-api-web-node",
-  "version": "5.2.1",
+  "version": "5.2.2",
   "description": "Instagram web api nodejs.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,7 +14,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "start": "node -r dotenv/config .",
-    "build": "rimraf build && tsc -p tsconfig.json --outDir dist && node scripts/build.js",
+    "build": "rimraf dist && tsc -p tsconfig.json --outDir dist && node scripts/build.js",
     "test": "jest"
   },
   "keywords": [

@@ -3,13 +3,7 @@ const path = require('path');
 const { zip } = require('zip-a-folder');
 
 function getVersion() {
-  const { VERSION } = require('../dist/constants');
-  if (VERSION === undefined) {
-    console.log(`No specify release version.`);
-    process.exit(0);
-  }
-
-  return VERSION;
+  return "1.0.1";
 }
 
 
