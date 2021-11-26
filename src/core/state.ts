@@ -10,8 +10,8 @@ import * as supportedCapabilities from '../samples/supported-capabilities.json';
 import * as Constants from './constants';
 import { Enumerable } from '../decorators';
 import debug from 'debug';
-import { userAgentFactory } from './useragents'
-
+const useragents_1  = require("user-agents");
+const userAgent     = new useragents_1();
 export class State {
   private static stateDebug = debug('ig:state');
   get signatureKey(): string {
@@ -80,7 +80,7 @@ export class State {
   uuid: string;
   phoneId: string;
   host: string = "https://www.instagram.com"
-  useragents = userAgentFactory();
+  useragents = userAgent.toString();
   adid: string;
   deviceId: string;
   @Enumerable(false)
