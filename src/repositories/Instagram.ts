@@ -2,6 +2,7 @@ import { Repository } from '../core/repository';
 import {
     AccountRepositoryLoginResponseRootObject , ChallengeStateResponse, MediaInfoResponseRootObject, UserRepositoryInfoResponseRootObject, UserRepositoryInfoResponseUser} from '../responses';
 import {
+    IgCookieNotFoundError,
     IgRecaptchaResponseError} from '../errors';
 // @ts-ignore
 import { defaultsDeep } from 'lodash';
@@ -34,6 +35,9 @@ export class Instagram extends Repository {
             const matches = res.toJSON().body.match(pattern)
             value = matches[0].substring(13)
         })
+        if(typeof value !== "string"){
+            throw new IgCookieNotFoundError("IgCookieNotFoundError");
+        }
         this.client.state.csrftoken = value;
         this.request = this.request.defaults({
             headers: { 'X-CSRFToken': value }
@@ -50,6 +54,7 @@ export class Instagram extends Repository {
                 },
             });
             const sharedData = await this._getSharedData('/challenge/');
+            this.client.state.XinstagramAJAX  = sharedData.rollout_hash ? sharedData.rollout_hash : 1;
             if(sharedData.entry_data.hasOwnProperty("Challenge")){
                 _sharedData = sharedData.entry_data.Challenge[0];
                 if (_sharedData.challengeType == "RecaptchaChallengeForm") {

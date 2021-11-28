@@ -8,6 +8,7 @@ import * as devices from '../samples/devices.json';
 import * as builds from '../samples/builds.json';
 import * as supportedCapabilities from '../samples/supported-capabilities.json';
 import * as Constants from './constants';
+import * as agents from '../samples/webUserAgent.json';
 import { Enumerable } from '../decorators';
 import debug from 'debug';
 const useragents_1  = require("user-agents");
@@ -78,6 +79,7 @@ export class State {
   deviceString: string;
   build: string;
   uuid: string;
+  XinstagramAJAX?: string;
   phoneId: string;
   host: string = "https://www.instagram.com"
   useragents = userAgent.toString();
@@ -129,11 +131,10 @@ export class State {
   }
 
   public get webUserAgent() {
-    return this.useragents;
-  }
+    const chance = new Chance(Math.round(Date.now() / 10800000));
+    this.useragents = chance.pickone(agents);
 
-  public isExperimentEnabled(experiment) {
-    return this.experiments.includes(experiment);
+    return this.useragents;
   }
 
  public get cookieCsrfToken() {
