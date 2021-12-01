@@ -11,8 +11,6 @@ import * as Constants from './constants';
 import * as agents from '../samples/webUserAgent.json';
 import { Enumerable } from '../decorators';
 import debug from 'debug';
-const useragents_1  = require("user-agents");
-const userAgent     = new useragents_1();
 export class State {
   private static stateDebug = debug('ig:state');
   get signatureKey(): string {
@@ -70,7 +68,7 @@ export class State {
   isLayoutRTL: boolean = false;
   euDCEnabled?: boolean = undefined;
   adsOptOut: boolean = false;
-  csrftoken: string = null;
+  csrftoken?: string = null;
   thumbnailCacheBustingValue: number = 1000;
   igWWWClaim?: string;
   authorization?: string;
@@ -82,7 +80,7 @@ export class State {
   XinstagramAJAX?: string;
   phoneId: string;
   host: string = "https://www.instagram.com"
-  useragents = userAgent.toString();
+  useragents?: string= null;
   adid: string;
   deviceId: string;
   @Enumerable(false)
@@ -131,9 +129,6 @@ export class State {
   }
 
   public get webUserAgent() {
-    const chance = new Chance(Math.round(Date.now() / 10800000));
-    this.useragents = chance.pickone(agents);
-
     return this.useragents;
   }
 
@@ -231,8 +226,14 @@ export class State {
     this.phoneId = chance.guid();
     this.adid = chance.guid();
     this.build = chance.pickone(builds);
+    this.useragents = chance.pickone(agents);
   }
-
+  public generateUserAgents(seed: string): void {
+    const chance    = new Chance(seed);
+    const usragent  = chance.pickone(agents); 
+    this.useragents = usragent;
+    this.csrftoken  = this.csrftoken == null ? this.extractCookieValue('csrftoken') : null;
+  }
   private generateTemporaryGuid(seed: string, lifetime: number) {
     return new Chance(`${seed}${this.deviceId}${Math.round(Date.now() / lifetime)}`).guid();
   }

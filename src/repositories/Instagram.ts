@@ -11,7 +11,7 @@ import * as crypto from 'crypto';
 import * as request from 'request-promise-native';
 import { AccountRepositoryCurrentUserResponseRootObject } from 'src/responses/account.repository.current-user.response';
 export class Instagram extends Repository {
-    request = request.defaults({
+    request: request = request.defaults({
         baseUrl: this.client.state.host,
         uri: '',
         headers:{
@@ -30,7 +30,7 @@ export class Instagram extends Repository {
         }
         let _sharedData: any;
         let value: string;
-        this.request('/', { resolveWithFullResponse: true }).then(res => {
+        await this.request('/', { resolveWithFullResponse: true }).then(res => {
             const pattern = new RegExp(/(csrf_token":")\w+/)
             const matches = res.toJSON().body.match(pattern)
             value = matches[0].substring(13)

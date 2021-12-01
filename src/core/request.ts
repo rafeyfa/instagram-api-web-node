@@ -198,8 +198,8 @@ export class Request {
 
   public getDefaultHeaders() {
     return {
-      'User-Agent': this.client.state.webUserAgent || this.client.state.useragents,
-      'accept-language': this.client.state.language || 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
+      'User-Agent': this.client.state.webUserAgent,
+      'accept-language': this.client.state.language,
       'sec-fetch-site': 'same-origin',
       'sec-fetch-mode': 'cors',
       'sec-fetch-dest': 'empty',
