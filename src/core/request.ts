@@ -14,7 +14,7 @@ import {
   IgNetworkError,
   IgNotFoundError,
   IgRequestsLimitError,
-  IgResponseError, IgLoginBadPasswordError
+  IgResponseError, IgLoginBadPasswordError, IgCookieNotFoundError
 } from '../errors';
 import { IgResponse } from '../types';
 import JSONbigInt = require('json-bigint');
@@ -52,6 +52,10 @@ export class Request {
     return Object.prototype.hasOwnProperty.call(obj, prop);
   }
   public async send<T = any>(userOptions: Options, onlyCheckHttpStatus?: boolean): Promise<IgResponse<T>> {
+    const csrftoken = this.client.state.cookieCsrfToken == "missing" ? this.client.state.csrftoken : this.client.state.cookieCsrfToken;
+    if(typeof csrftoken !== "string" || csrftoken === "missing" || csrftoken === null){
+      throw new IgCookieNotFoundError("IgCookieNotFoundError");
+    }
     const options = defaultsDeep(
       userOptions,
       {
@@ -205,7 +209,7 @@ export class Request {
       'sec-fetch-dest': 'empty',
       'x-requested-with': 'XMLHttpRequest',
       'X-IG-WWW-Claim': this.client.state.igWWWClaim || '0',
-      'x-instagram-ajax': this.client.state.XinstagramAJAX ? this.client.state.XinstagramAJAX : 1,
+      'x-instagram-ajax': this.client.state.XinstagramAJAX ? this.client.state.XinstagramAJAX : "1284f5c4fcfb",
       'x-csrftoken': this.client.state.cookieCsrfToken || this.client.state.csrftoken,
       'x-ig-app-id': 936619743392459,
       'origin': 'https://www.instagram.com',
@@ -230,8 +234,8 @@ export class Request {
           // needed? 'X-DEVICE-ID': this.client.state.uuid,
           'X-CM-Bandwidth-KBPS': '-1.000',
           'X-CM-Latency': '-1.000',
-          'X-IG-App-Locale': this.client.state.language,
-          'X-IG-Device-Locale': this.client.state.language,
+          'X-IG-App-Locale': "en_US",
+          'X-IG-Device-Locale': "en_US",
           'X-Pigeon-Session-Id': this.client.state.pigeonSessionId,
           'X-Pigeon-Rawclienttime': (Date.now() / 1000).toFixed(3),
           'X-IG-Connection-Speed': `${random(1000, 3700)}kbps`,
@@ -250,7 +254,7 @@ export class Request {
           'X-IG-App-ID': this.client.state.fbAnalyticsApplicationId,
           'X-IG-Device-ID': this.client.state.uuid,
           'X-IG-Android-ID': this.client.state.deviceId,
-          'Accept-Language': this.client.state.language.replace('_', '-'),
+          'Accept-Language': "en-US",
           'X-FB-HTTP-Engine': 'Liger',
           Authorization: this.client.state.authorization,
           Host: 'i.instagram.com',

@@ -8,7 +8,7 @@ import * as devices from '../samples/devices.json';
 import * as builds from '../samples/builds.json';
 import * as supportedCapabilities from '../samples/supported-capabilities.json';
 import * as Constants from './constants';
-import * as agents from '../samples/webUserAgent.json';
+import { userAgentFactory } from 'generate-useragent-node';
 import { Enumerable } from '../decorators';
 import debug from 'debug';
 export class State {
@@ -60,7 +60,7 @@ export class State {
   @Enumerable(false)
   constants = Constants;
   supportedCapabilities = supportedCapabilities;
-  language: string = 'en_US';
+  language: string = 'en-US,en;q=0.9';
   timezoneOffset: string = String(new Date().getTimezoneOffset() * -60);
   radioType = 'wifi-none';
   capabilitiesHeader = '3brTvwE=';
@@ -134,7 +134,9 @@ export class State {
 
  public get cookieCsrfToken() {
     try {
-      return this.extractCookieValue('csrftoken');
+      const cookiecsrf = this.extractCookieValue('csrftoken');
+      this.csrftoken = cookiecsrf;
+      return cookiecsrf;
     } catch {
       State.stateDebug('csrftoken lookup failed, returning "missing".');
       return 'missing';
@@ -174,9 +176,11 @@ export class State {
       throw new IgUserIdNotFoundError();
     }
   }
-
   public async deserializeCookieJar(cookies: string | CookieJar.Serialized) {
     this.cookieJar['_jar'] = await Bluebird.fromCallback(cb => CookieJar.deserialize(cookies, this.cookieStore, cb));
+  }
+  public async removeCookie() {
+    return await Bluebird.fromCallback(cb => this.cookieStore.removeCookies(this.host, "/", cb));
   }
 
   public async serializeCookieJar(): Promise<CookieJar.Serialized> {
@@ -214,6 +218,9 @@ export class State {
       this[key] = value;
     }
   }
+  public generateUserAgents(seed: string): void {
+    this.useragents = userAgentFactory(seed);
+  }
   public generateDevice(seed: string): void {
     const chance = new Chance(seed);
     this.deviceString = chance.pickone(devices);
@@ -226,14 +233,9 @@ export class State {
     this.phoneId = chance.guid();
     this.adid = chance.guid();
     this.build = chance.pickone(builds);
-    this.useragents = chance.pickone(agents);
+    this.useragents = userAgentFactory(seed);
   }
-  public generateUserAgents(seed: string): void {
-    const chance    = new Chance(seed);
-    const usragent  = chance.pickone(agents); 
-    this.useragents = usragent;
-    this.csrftoken  = this.csrftoken == null ? this.extractCookieValue('csrftoken') : null;
-  }
+
   private generateTemporaryGuid(seed: string, lifetime: number) {
     return new Chance(`${seed}${this.deviceId}${Math.round(Date.now() / lifetime)}`).guid();
   }

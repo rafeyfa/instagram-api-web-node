@@ -19,3 +19,4 @@ export * from './spam.response';
 export * from './spam.response';
 export * from './ig-get-user-by-username.response';
 export * from './user.repository.info.response';
+export * from './account.repository.current-user.response'

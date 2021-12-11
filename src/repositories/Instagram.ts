@@ -1,6 +1,6 @@
 import { Repository } from '../core/repository';
 import {
-    AccountRepositoryLoginResponseRootObject , ChallengeStateResponse, MediaInfoResponseRootObject, UserRepositoryInfoResponseRootObject, UserRepositoryInfoResponseUser} from '../responses';
+    AccountRepositoryCurrentUserResponseRootObject, AccountRepositoryLoginResponseRootObject , ChallengeStateResponse, MediaInfoResponseRootObject, UserRepositoryInfoResponseRootObject, UserRepositoryInfoResponseUser} from '../responses';
 import {
     IgCookieNotFoundError,
     IgRecaptchaResponseError} from '../errors';
@@ -9,7 +9,7 @@ import { defaultsDeep } from 'lodash';
 // @ts-ignore
 import * as crypto from 'crypto';
 import * as request from 'request-promise-native';
-import { AccountRepositoryCurrentUserResponseRootObject } from 'src/responses/account.repository.current-user.response';
+
 export class Instagram extends Repository {
     request: request = request.defaults({
         baseUrl: this.client.state.host,
@@ -29,18 +29,16 @@ export class Instagram extends Repository {
             return `#PWD_INSTAGRAM_BROWSER:0:${Date.now()}:${pwd}`
         }
         let _sharedData: any;
-        let value: string;
-        await this.request('/', { resolveWithFullResponse: true }).then(res => {
-            const pattern = new RegExp(/(csrf_token":")\w+/)
-            const matches = res.toJSON().body.match(pattern)
-            value = matches[0].substring(13)
-        })
-        if(typeof value !== "string"){
+        await this.client.state.removeCookie();
+        const sharedData = await this._getSharedData('/');
+        this.client.state.XinstagramAJAX  = sharedData.rollout_hash ? sharedData.rollout_hash : 1;
+        const csrftoken  = sharedData.config.csrf_token;
+        if(typeof csrftoken !== "string"){
             throw new IgCookieNotFoundError("IgCookieNotFoundError");
         }
-        this.client.state.csrftoken = value;
+        this.client.state.csrftoken = csrftoken;
         this.request = this.request.defaults({
-            headers: { 'X-CSRFToken': value }
+            headers: { 'X-CSRFToken': csrftoken }
         })
         try {
            const response = await this.client.request.send<AccountRepositoryLoginResponseRootObject>({
@@ -54,13 +52,14 @@ export class Instagram extends Repository {
                 },
             });
             const sharedData = await this._getSharedData('/challenge/');
-            this.client.state.XinstagramAJAX  = sharedData.rollout_hash ? sharedData.rollout_hash : 1;
+            //this.client.state.XinstagramAJAX  = sharedData.rollout_hash ? sharedData.rollout_hash : 1;
             if(sharedData.entry_data.hasOwnProperty("Challenge")){
                 _sharedData = sharedData.entry_data.Challenge[0];
                 if (_sharedData.challengeType == "RecaptchaChallengeForm") {
                     throw new IgRecaptchaResponseError();
                 }
             }
+            this.client.state.csrftoken = this.client.state.extractCookieValue("csrftoken");
             return response.body;
         } catch (error) {
             throw (error);
@@ -92,6 +91,16 @@ export class Instagram extends Repository {
         const { body } = await this.client.request.send({
             method: 'POST',
             url: `/web/likes/${mediaId}/like/`
+        })
+        return body;
+    }
+    public async likeComments(idcomments: number, shortcode: string) {
+        const { body } = await this.client.request.send({
+            method: 'POST',
+            headers: {
+                referer: `https://www.instagram.com/p/${shortcode}/comments/`
+            },
+            url: `/web/comments/like/${idcomments}/`
         })
         return body;
     }
@@ -160,6 +169,32 @@ export class Instagram extends Repository {
                 html => html.split('window._sharedData = ')[1].split(';</script>')[0]
             )
             .then(_sharedData => JSON.parse(_sharedData))
+    }
+    public async getMediaComments({ shortcode, first = 12, after = '' }) {
+        return this.request('/graphql/query/', {
+          qs: {
+            query_hash: 'bc3296d1ce80a24b1b6e40b1e72903f5',
+            variables: JSON.stringify({ shortcode, first, after })
+          }
+        })
+          .then(response => response.data.shortcode_media || {})
+          .then(media => media.edge_media_to_parent_comment || {})
+          .then(({ count = 0, page_info = {}, edges = [] }) => ({
+            count,
+            page_info,
+            edges
+          }))
+    }
+    public async GetCommentInfo({ comment_id }) {
+        //https://www.instagram.com/p/CXVtjdslf8J/c/18134990221245389/liked_by/
+        return this.request('/graphql/query/', {
+          qs: {
+            query_hash: '5f0b1f6281e72053cbc07909c8d154ae',
+            variables: JSON.stringify({ comment_id, first: 48 })
+          }
+        }).then(
+            data => data.data.comment
+          )
     }
     /*************** NEW ****************/
     public async GetTimelineFeed() {
