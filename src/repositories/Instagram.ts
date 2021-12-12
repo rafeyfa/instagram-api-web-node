@@ -1,6 +1,6 @@
 import { Repository } from '../core/repository';
 import {
-    AccountRepositoryCurrentUserResponseRootObject, AccountRepositoryLoginResponseRootObject , ChallengeStateResponse, MediaInfoResponseRootObject, UserRepositoryInfoResponseRootObject, UserRepositoryInfoResponseUser} from '../responses';
+    AccountRepositoryCurrentUserResponseRootObject, AccountRepositoryLoginResponseRootObject , AccountRepositoryRegister, ChallengeStateResponse, MediaInfoResponseRootObject, UserRepositoryInfoResponseRootObject, UserRepositoryInfoResponseUser} from '../responses';
 import {
     IgCookieNotFoundError,
     IgRecaptchaResponseError} from '../errors';
@@ -264,4 +264,103 @@ export class Instagram extends Repository {
         });
         return body.items;
     }
+    public async createAttemp(username: string, 
+        password: string, 
+        phone_number: string, 
+        first_name: string, 
+        ) : Promise<AccountRepositoryRegister>{
+            
+        const sharedData = await this._getSharedData('/');
+        this.client.state.XinstagramAJAX  = sharedData.rollout_hash ? sharedData.rollout_hash : 1;
+        const csrftoken  = sharedData.config.csrf_token;
+        if(typeof csrftoken !== "string"){
+            throw new IgCookieNotFoundError("IgCookieNotFoundError");
+        }
+        this.client.state.csrftoken = csrftoken;
+        this.request = this.request.defaults({
+            headers: { 'X-CSRFToken': csrftoken }
+        })
+        const { value: mid }= this.client.state.cookieJar.getCookies(this.client.state.host).find(({ key }) => key === 'mid') || {}
+        
+        let client_id: any = mid;
+
+        const createEncPassword = pwd => {
+          return `#PWD_INSTAGRAM_BROWSER:0:${Date.now()}:${pwd}`
+        }
+        
+        const { body } = await this.client.request.send({
+            url: `/accounts/web_create_ajax/attempt/`,
+            method: 'POST',
+            form: { 
+              username, 
+              enc_password: createEncPassword(password),
+              first_name,
+              phone_number,
+              client_id: client_id,
+              seamless_login_enabled: 1
+            }
+        });
+
+        return body;
+      }
+      public async checkAge(day: string, month: string, year: string){
+        const { body } = await this.client.request.send({
+            url: '/web/consent/check_age_eligibility/',
+            method: 'POST',
+            form: { 
+              day,
+              month,
+              year
+            }
+        })
+        return body;
+      }
+
+      public async sendOTP(phone_number: string){
+        const { value: mid }= this.client.state.cookieJar.getCookies(this.client.state.host).find(({ key }) => key === 'mid') || {}
+        const { body }= await this.client.request.send({
+            url: '/accounts/send_signup_sms_code_ajax/',
+            method: 'POST',
+            form: { 
+              client_id: mid,
+              phone_number,
+              phone_id: '',
+              big_blue_token: ''
+            }
+          })
+         return body;
+      }
+      public async create(username: string, 
+        password: string, 
+        phone_number: string, 
+        first_name: string, 
+        day: string, month: string, year: string, sms_code: number
+        ) : Promise<AccountRepositoryRegister>{
+
+        const createEncPassword = pwd => {
+            return `#PWD_INSTAGRAM_BROWSER:0:${Date.now()}:${pwd}`
+        }
+        const { value: mid }= this.client.state.cookieJar.getCookies(this.client.state.host).find(({ key }) => key === 'mid') || {}
+        this.request = this.request.defaults({
+            headers: { 'Referer': 'https://www.instagram.com/accounts/emailsignup/' },
+        })
+        const { body } = await this.client.request.send({
+            url: '/accounts/web_create_ajax/',
+            method: 'POST',
+            form: { 
+                enc_password: createEncPassword(password),
+                phone_number,
+                username,
+                first_name,
+                month,
+                day,
+                year,
+                sms_code,
+                client_id: mid,
+                seamless_login_enabled: 1,
+                tos_version: 'row'
+            }
+        })
+        return body;
+      }
 }

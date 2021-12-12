@@ -35,3 +35,16 @@ export interface AccountRepositoryLoginResponseNametag {
   emoji: string;
   selfie_sticker: string;
 }
+export interface AccountRepositoryRegister {
+  username: string;
+  password: string;
+  phone_number: string;
+  first_name: string;
+  day: string;
+  month: string;
+  year: string;
+  status: string;
+  username_suggestions: any[];
+  account_created: boolean;
+  error_type: string;
+}
