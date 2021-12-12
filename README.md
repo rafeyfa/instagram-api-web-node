@@ -25,7 +25,7 @@ function save(data){
       });
       //set login account
       const { username, password } = process.env; 
-      await instagram.ig.state.generateDevice(); 
+      await instagram.state.generateDevice(); 
       //login use account username and password
       await instagram.ig.login(username, password);
   } catch (error){
