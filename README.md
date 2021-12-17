@@ -25,8 +25,7 @@ function save(data){
       });
       //set login account
       const { username, password } = process.env; 
-      //Get access token for headers default. setCookieForFirst()
-      await instagram.ig.setCookieForFirst(); 
+      await instagram.state.generateDevice(); 
       //login use account username and password
       await instagram.ig.login(username, password);
   } catch (error){
