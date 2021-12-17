@@ -209,9 +209,10 @@ export class Request {
       'sec-fetch-dest': 'empty',
       'x-requested-with': 'XMLHttpRequest',
       'X-IG-WWW-Claim': this.client.state.igWWWClaim || '0',
-      'x-instagram-ajax': this.client.state.XinstagramAJAX ? this.client.state.XinstagramAJAX : "1284f5c4fcfb",
+      'x-instagram-ajax': this.client.state.XinstagramAJAX ? this.client.state.XinstagramAJAX : "1",
+      'x-asbd-id': 198387,
       'x-csrftoken': this.client.state.cookieCsrfToken || this.client.state.csrftoken,
-      'x-ig-app-id': 936619743392459,
+      'x-ig-app-id': 1217981644879628,
       'origin': 'https://www.instagram.com',
       Referer: this.client.state.host
     };
