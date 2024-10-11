@@ -1,6 +1,6 @@
 {
   "name": "instagram-api-web-node",
-  "version": "5.2.21",
+  "version": "5.2.30",
   "description": "Instagram web api nodejs.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -43,7 +43,7 @@
     "tough-cookie": "^2.5.0",
     "ts-custom-error": "^2.2.2",
     "ts-xor": "^1.0.6",
-    "url-regex-safe": "^1.0.2",
+    "url-regex-safe": "^4.0.0",
     "user-agents": "^1.0.828",
     "utility-types": "^3.10.0",
     "zip-a-folder": "^1.1.0"
